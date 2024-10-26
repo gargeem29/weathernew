@@ -1,3 +1,10 @@
+![image](https://github.com/user-attachments/assets/0ab89a99-6514-4b51-afd6-09236b95aa12)
+
+![image](https://github.com/user-attachments/assets/7b8c7cac-e1c0-4083-8626-ea6f6336cbd0)
+
+
+
+
 # Weather Dashboard
 
 ## Description
@@ -65,7 +72,5 @@ SOFTWARE.
 
 
 
-![image](https://github.com/user-attachments/assets/0ab89a99-6514-4b51-afd6-09236b95aa12)
 
-![image](https://github.com/user-attachments/assets/7b8c7cac-e1c0-4083-8626-ea6f6336cbd0)
 
