@@ -36,10 +36,23 @@ Before you begin, ensure you have the following installed:
 ### Step 1: Clone or Download the Project
 
 To get the project files, you can either clone the repository or download it as a ZIP file.
-git clone <repo-url>
 
-### Step 2: Change working directory to backend and install requirements.txt
-in weather_backend.py, make sure to change to add your OpenWeatherAPI Key
+git clone <repo-url>
+cd WEATHERNEW
+
+### Step 2: Set Up the Backend and install requirements.txt
+
+1. **Navigate to the `backend` directory**:
+   cd backend
+
+### Step 3: Run the Backend Server
+
+Run the Flask server from the `backend` directory: python weather_backend.py
+
+### Step 4:
+
+**Navigate to the frontend directory and open index.html**
+
 
 
 
