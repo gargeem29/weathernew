@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+        }
+        table {
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 20px; 
+        }
+        th, td { 
+            padding: 8px; 
+            border: 1px solid #ddd; 
+            text-align: center; 
+        }
+        th { 
+            background-color: #f2f2f2; 
+        }
+        #alerts { 
+            margin: 20px 0; 
+        }
+        #visualizations { 
+            margin: 20px 0; 
+        }
+        h2 { 
+            margin-top: 30px; 
+        }
+        canvas {
+            max-width: 100%; /* Responsive canvas */
+            height: 400px; /* Set a fixed height */
+            display: block; 
+            margin: 0 auto; /* Centering */
+        }
+    </style>
+</head>
+<body>
+    <h1>Weather Dashboard</h1>
+    
+    <h2>Daily Weather Summary</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>City</th>
+                <th>Date</th>
+                <th>Average Temp (°C)</th>
+                <th>Max Temp (°C)</th>
+                <th>Min Temp (°C)</th>
+                <th>Dominant Weather</th>
+            </tr>
+        </thead>
+        <tbody id="weather-data"></tbody>
+    </table>
+
+    <div>
+        <h2>Alerts</h2>
+        <div id="alerts"></div>
+    </div>
+
+    <div id="visualizations">
+        <h2>Visualizations</h2>
+        <canvas id="weatherChart"></canvas> <!-- Removed width and height -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let alertMessages = [];
+        async function fetchWeatherData() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/weather_summary');
+                const data = await response.json();
+                
+                const tbody = document.getElementById('weather-data');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6">No weather data available for today.</td></tr>';
+                    return;
+                }
+
+                // Create an object to hold aggregated weather data
+                const aggregatedData = {};
+
+                data.forEach(item => {
+                    const key = `${item.city}_${item.date}`;
+                    if (!aggregatedData[key]) {
+                        aggregatedData[key] = {
+                            city: item.city,
+                            date: item.date,
+                            avg_temp: item.avg_temp,
+                            max_temp: item.max_temp,
+                            min_temp: item.min_temp,
+                            dominant_weather: item.dominant_weather,
+                            count: 1
+                        };
+                    } else {
+                        // Aggregate the data
+                        aggregatedData[key].avg_temp += item.avg_temp;
+                        aggregatedData[key].max_temp = Math.max(aggregatedData[key].max_temp, item.max_temp);
+                        aggregatedData[key].min_temp = Math.min(aggregatedData[key].min_temp, item.min_temp);
+                        aggregatedData[key].count += 1;
+                    }
+                });
+
+                // Calculate the final averages and prepare for rendering
+                const finalData = Object.values(aggregatedData).map(item => {
+                    return {
+                        city: item.city,
+                        date: item.date,
+                        avg_temp: item.avg_temp / item.count, // Calculate average
+                        max_temp: item.max_temp,
+                        min_temp: item.min_temp,
+                        dominant_weather: item.dominant_weather
+                    };
+                });
+
+                finalData.forEach(item => {
+                    const row = `<tr>
+                        <td>${item.city}</td>
+                        <td>${item.date}</td>
+                        <td>${item.avg_temp.toFixed(2)}</td>
+                        <td>${item.max_temp.toFixed(2)}</td>
+                        <td>${item.min_temp.toFixed(2)}</td>
+                        <td>${item.dominant_weather}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+
+                    // Check for alerts
+                    checkAlerts(item);
+                });
+
+                // Visualize the weather data after the data has been processed
+                visualizeWeatherData(finalData);
+
+            } catch (error) {
+                console.error('Error fetching weather data:', error);
+                document.getElementById('alerts').innerHTML = '<div>Error loading weather data. Please try again later.</div>';
+            }
+        }
+
+        function checkAlerts(item) {
+            const tempThreshold = 30; // Configurable threshold
+            if (item.max_temp > tempThreshold) {
+                const alertMessage = `ALERT: ${item.city} temperature has exceeded ${tempThreshold}°C. Current max: ${item.max_temp.toFixed(2)}°C.`;
+                alertMessages.push(alertMessage);
+                document.getElementById('alerts').innerHTML = alertMessages.map(msg => `<div>${msg}</div>`).join('');
+            }
+        }
+
+        function visualizeWeatherData(data) {
+            const labels = data.map(item => item.city);
+            const avgTemps = data.map(item => item.avg_temp);
+            const maxTemps = data.map(item => item.max_temp);
+            const minTemps = data.map(item => item.min_temp);
+
+            const ctx = document.getElementById('weatherChart').getContext('2d');
+            const weatherChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Average Temperature (°C)',
+                            data: avgTemps,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Max Temperature (°C)',
+                            data: maxTemps,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Min Temperature (°C)',
+                            data: minTemps,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 10 // Set y-axis intervals to 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fetch data on load
+        window.onload = fetchWeatherData;
+    </script>
+</body>
+</html>
