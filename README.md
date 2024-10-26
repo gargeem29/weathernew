@@ -14,6 +14,27 @@ Weather Dashboard is a web application that visualizes weather data for multiple
 - Visualizes average, maximum, and minimum temperatures in a bar chart
 - Alerts for temperatures exceeding a specified threshold
 
+## Installation
+
+Follow the steps below to set up the Weather Monitoring Project on your local machine.
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Python 3.6 or later**: [Download Python](https://www.python.org/downloads/)
+- **pip**: Package manager for Python (usually included with Python installations)
+- **Git (optional)**: For cloning the repository
+
+### Step 1: Clone or Download the Project
+
+To get the project files, you can either clone the repository or download it as a ZIP file.
+git clone <repo-url>
+
+### Step 2: Change working directory to backend and install requirements.txt
+in weather_backend.py, make sure to change to add your OpenWeatherAPI Key
+
+
 
 
 
